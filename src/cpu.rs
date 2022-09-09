@@ -30,7 +30,7 @@ const CHIP8_FONT: [u8; 80] = [
 pub struct Cpu {
 
     // RAM, writable memory
-    memory: [u8; MEMORY_SIZE],
+    pub memory: [u8; MEMORY_SIZE],
     
     // A program counter (PC) which points at the current instruction in memory
     pc: u16,
@@ -83,6 +83,11 @@ impl Cpu {
             display: [[0; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
             keypad: [false; 16], // Keys start as not pressed
         }
+    }
+
+    // Loading ROM data into memory starting at the initial address
+    pub fn load_rom(&mut self, rom_data: &[u8]) {
+        self.memory[(START_ADDRESS as usize)..(START_ADDRESS as usize + rom_data.len())].copy_from_slice(rom_data);
     }
 
     // Fetching the instruction from memory at the current PC

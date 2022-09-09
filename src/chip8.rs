@@ -1,7 +1,7 @@
 use crate::cpu::Cpu;
 
 pub struct Chip8 {
-    cpu: Cpu,
+    pub cpu: Cpu,
 }
 
 impl Chip8 {
