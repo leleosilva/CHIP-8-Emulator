@@ -64,7 +64,7 @@ pub struct Cpu {
 
 impl Cpu {
 
-    // Creating new instance of the CPU
+    // Creating new instance of CPU
     pub fn new() -> Cpu {
         
         // Initializing memory with 0's and storing font data at 0x50 ~ 0x9F address interval
