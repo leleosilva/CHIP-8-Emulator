@@ -87,7 +87,20 @@ impl Cpu {
 
     // Fetching the instruction from memory at the current PC
     fn fetch(&mut self) -> u16 {
+        
+        /* An instruction is two bytes. Therefore, two consecutive bytes
+         * from memory are read and combined into one 2-bytes instruction */
+        let op1 = self.memory[self.pc as usize];
+        let op2 = self.memory[(self.pc + 1) as usize];
+        
+        /* To get the opcode, the first byte should be shifted to the left by 8 bits
+         * and then combined with the second byte by an logical OR operation */
+        let instruction_opcode = (op1 << 8) as u16 | op2 as u16;
+        
+        // PC is incremented by 2 to be ready to fetch the next instruction 
+        self.pc += 2;
 
+        instruction_opcode
     }
 
     // Decoding the instruction according to its opcode to find out what the emulator should do
