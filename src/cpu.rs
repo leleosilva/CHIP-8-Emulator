@@ -85,7 +85,7 @@ impl Cpu {
         }
     }
 
-    // Loading ROM data into memory starting at the initial address
+    // Loading ROM data into memory, starting at the initial address
     pub fn load_rom(&mut self, rom_data: &[u8]) {
         self.memory[(START_ADDRESS as usize)..(START_ADDRESS as usize + rom_data.len())].copy_from_slice(rom_data);
     }
@@ -100,7 +100,7 @@ impl Cpu {
         
         /* To get the opcode, the first byte should be shifted to the left by 8 bits
          * and then combined with the second byte by an logical OR operation */
-        let instruction_opcode = (op1 << 8) as u16 | op2 as u16;
+        let instruction_opcode = (op1 as u16) << 8 | op2 as u16;
         
         // PC is incremented by 2 to be ready to fetch the next instruction 
         self.pc += 2;
@@ -109,8 +109,8 @@ impl Cpu {
     }
 
     // Decoding the instruction according to its opcode to find out what the emulator should do
-    fn decode(&mut self, opcode: u16) {
-
+    pub fn decode(&mut self, opcode: u16) {
+        let opcode = self.fetch();
     }
 
     /* EXECUTION OF INDIVIDUAL INSTRUCTIONS */
