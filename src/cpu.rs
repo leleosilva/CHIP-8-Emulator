@@ -1,3 +1,5 @@
+use std::time;
+
 // CHIP-8 can access 4KB (4096 bytes) of RAM
 const MEMORY_SIZE: usize = 4096;
 
@@ -7,6 +9,10 @@ const DISPLAY_HEIGHT: usize = 32;
 
 // After loading, CHIP-8 programs start at address 0x200
 const START_ADDRESS: u16 = 0x200;
+
+/* The delay and sound timers decrement at a rate of 60Hz (60 times per second)
+ * Therefore, (1 / 60) = 0.0166666667s = 16667μs */
+const TIMER_RATE: u64 = 16667;
 
 const CHIP8_FONT: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -59,6 +65,9 @@ pub struct Cpu {
     /* CHIP-8 uses a hexadecimal keypad that had 16 keys, labelled 0 through F,
      * and were arranged in a 4x4 grid */
     keypad: [bool; 16],
+
+    // The period of time the CPU uses to finish a cycle
+    tick_period: time::Instant,
     
 }
 
@@ -82,6 +91,7 @@ impl Cpu {
             sound_timer: 0,
             display: [[0; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
             keypad: [false; 16], // Keys start as not pressed
+            tick_period: time::Instant::now(), // Storing when the CPU cycle begins
         }
     }
 
@@ -144,6 +154,40 @@ impl Cpu {
         println!("op2: {:X}", op2);
         println!("op3: {:X}", op3);
         println!("op4: {:X}", op4);
+    }
+
+
+    // Executing the instruction found by decoding the opcode
+    fn execute(&self) {
+
+    }
+
+    // Running the CPU cycle
+    pub fn run(&mut self) {
+
+        let opcode = self.fetch();
+
+        self.decode(opcode);
+
+        self.execute();
+
+        /* If the time elapsed is greater or equal to the timer rate, it is time to decrement the timers.
+         * This ensures the timer rate is kept at 60Hz.  */
+        if self.tick_period.elapsed() >= time::Duration::from_micros(TIMER_RATE) {
+            
+            self.update_timers();
+            self.tick_period = time::Instant::now(); // Updating tick period after the cycle ends
+        }
+    }
+
+    // Decrementing timers when they are greater than zero
+    fn update_timers(&mut self) {
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+        if self.sound_timer > 0 {
+            self.sound_timer -= 1;
+        }
     }
 
     /* EXECUTION OF INDIVIDUAL INSTRUCTIONS */
