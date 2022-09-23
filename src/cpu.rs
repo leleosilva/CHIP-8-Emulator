@@ -111,9 +111,6 @@ impl Cpu {
         /* To get the opcode, the first byte should be shifted to the left by 8 bits
          * and then combined with the second byte by an logical OR operation */
         let instruction_opcode = (op1 as u16) << 8 | op2 as u16;
-        
-        // PC is incremented by 2 to be ready to fetch the next instruction 
-        self.pc += 2;
 
         instruction_opcode
     }
@@ -154,6 +151,46 @@ impl Cpu {
         println!("op2: {:X}", op2);
         println!("op3: {:X}", op3);
         println!("op4: {:X}", op4);
+
+        // Control flow of instructions
+        match (op1, op2, op3, op4) {
+            (0x0, 0x0, 0xE, 0x0) => (),
+            (0x0, 0x0, 0xE, 0xE) => (),
+            (0x1, _, _, _) => (),
+            (0x2, _, _, _) => (),
+            (0x3, _, _, _) => (),
+            (0x4, _, _, _) => (),
+            (0x5, _, _, 0x0) => (),
+            (0x6, _, _, _) => (),
+            (0x7, _, _, _) => (),
+            (0x8, _, _, 0x0) => (),
+            (0x8, _, _, 0x1) => (),
+            (0x8, _, _, 0x2) => (),
+            (0x8, _, _, 0x3) => (),
+            (0x8, _, _, 0x4) => (),
+            (0x8, _, _, 0x5) => (),
+            (0x8, _, _, 0x6) => (),
+            (0x8, _, _, 0x7) => (),
+            (0x8, _, _, 0xE) => (),
+            (0x9, _, _, 0x0) => (),
+            (0xA, _, _, _) => (),
+            (0xB, _, _, _) => (),
+            (0xC, _, _, _) => (),
+            (0xD, _, _, _) => (),
+            (0xE, _, 0x9, 0xE) => (),
+            (0xE, _, 0xA, 0x1) => (),
+            (0xF, _, 0x0, 0x7) => (),
+            (0xF, _, 0x0, 0xA) => (),
+            (0xF, _, 0x1, 0x5) => (),
+            (0xF, _, 0x1, 0x8) => (),
+            (0xF, _, 0x1, 0xE) => (),
+            (0xF, _, 0x2, 0x9) => (),
+            (0xF, _, 0x3, 0x3) => (),
+            (0xF, _, 0x5, 0x5) => (),
+            (0xF, _, 0x6, 0x5) => (),
+            _ => panic!("Unknown instruction {:#06X}", opcode),
+        }
+
     }
 
     // Running the CPU cycle
@@ -162,6 +199,9 @@ impl Cpu {
         let opcode = self.fetch();
 
         self.decode(opcode);
+
+        // PC is incremented by 2 to be ready to fetch the next instruction 
+        self.pc += 2;
 
         /* If the time elapsed is greater or equal to the timer rate, it is time to decrement the timers.
          * This ensures the timer rate is kept at 60Hz.  */
