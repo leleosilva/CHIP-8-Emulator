@@ -118,7 +118,7 @@ impl Cpu {
         instruction_opcode
     }
 
-    // Decoding the instruction according to its opcode to find out what the emulator should do
+    // Decoding the instruction and calling its individual execution method
     pub fn decode(&mut self, opcode: u16) {
         
         // The fourth nibble of the instruction (lowest 4 bits)
@@ -156,20 +156,12 @@ impl Cpu {
         println!("op4: {:X}", op4);
     }
 
-
-    // Executing the instruction found by decoding the opcode
-    fn execute(&self) {
-
-    }
-
     // Running the CPU cycle
     pub fn run(&mut self) {
 
         let opcode = self.fetch();
 
         self.decode(opcode);
-
-        self.execute();
 
         /* If the time elapsed is greater or equal to the timer rate, it is time to decrement the timers.
          * This ensures the timer rate is kept at 60Hz.  */
