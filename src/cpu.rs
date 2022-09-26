@@ -154,40 +154,40 @@ impl Cpu {
 
         // Control flow of instructions
         match (op1, op2, op3, op4) {
-            (0x0, 0x0, 0xE, 0x0) => (),
-            (0x0, 0x0, 0xE, 0xE) => (),
-            (0x1, _, _, _) => (),
-            (0x2, _, _, _) => (),
-            (0x3, _, _, _) => (),
-            (0x4, _, _, _) => (),
-            (0x5, _, _, 0x0) => (),
-            (0x6, _, _, _) => (),
-            (0x7, _, _, _) => (),
-            (0x8, _, _, 0x0) => (),
-            (0x8, _, _, 0x1) => (),
-            (0x8, _, _, 0x2) => (),
-            (0x8, _, _, 0x3) => (),
-            (0x8, _, _, 0x4) => (),
-            (0x8, _, _, 0x5) => (),
-            (0x8, _, _, 0x6) => (),
-            (0x8, _, _, 0x7) => (),
-            (0x8, _, _, 0xE) => (),
-            (0x9, _, _, 0x0) => (),
-            (0xA, _, _, _) => (),
-            (0xB, _, _, _) => (),
-            (0xC, _, _, _) => (),
-            (0xD, _, _, _) => (),
-            (0xE, _, 0x9, 0xE) => (),
-            (0xE, _, 0xA, 0x1) => (),
-            (0xF, _, 0x0, 0x7) => (),
-            (0xF, _, 0x0, 0xA) => (),
-            (0xF, _, 0x1, 0x5) => (),
-            (0xF, _, 0x1, 0x8) => (),
-            (0xF, _, 0x1, 0xE) => (),
-            (0xF, _, 0x2, 0x9) => (),
-            (0xF, _, 0x3, 0x3) => (),
-            (0xF, _, 0x5, 0x5) => (),
-            (0xF, _, 0x6, 0x5) => (),
+            (0x0, 0x0, 0xE, 0x0) => self.instruction_00e0(),
+            (0x0, 0x0, 0xE, 0xE) => self.instruction_00ee(),
+            (0x1, _, _, _) => self.instruction_1nnn(nnn),
+            (0x2, _, _, _) => self.instruction_2nnn(nnn),
+            (0x3, _, _, _) => self.instruction_3xnn(x, nn),
+            (0x4, _, _, _) => self.instruction_4xnn(x, nn),
+            (0x5, _, _, 0x0) => self.instruction_5xy0(x, y),
+            (0x6, _, _, _) => self.instruction_6xnn(x, nn),
+            (0x7, _, _, _) => self.instruction_7xnn(x, nn),
+            (0x8, _, _, 0x0) => self.instruction_8xy0(x, y),
+            (0x8, _, _, 0x1) => self.instruction_8xy1(x, y),
+            (0x8, _, _, 0x2) => self.instruction_8xy2(x, y),
+            (0x8, _, _, 0x3) => self.instruction_8xy3(x, y),
+            (0x8, _, _, 0x4) => self.instruction_8xy4(x, y),
+            (0x8, _, _, 0x5) => self.instruction_8xy5(x, y),
+            (0x8, _, _, 0x6) => self.instruction_8xy6(x),
+            (0x8, _, _, 0x7) => self.instruction_8xy7(x, y),
+            (0x8, _, _, 0xE) => self.instruction_8xye(x),
+            (0x9, _, _, 0x0) => self.instruction_9xy0(x, y),
+            (0xA, _, _, _) => self.instruction_annn(nnn),
+            (0xB, _, _, _) => self.instruction_bnnn(nnn),
+            (0xC, _, _, _) => self.instruction_cxnn(x, nn),
+            (0xD, _, _, _) => self.instruction_dxyn(x, y, n),
+            (0xE, _, 0x9, 0xE) => self.instruction_ex9e(x),
+            (0xE, _, 0xA, 0x1) => self.instruction_exa1(x),
+            (0xF, _, 0x0, 0x7) => self.instruction_fx07(x),
+            (0xF, _, 0x0, 0xA) => self.instruction_fx0a(x),
+            (0xF, _, 0x1, 0x5) => self.instruction_fx15(x),
+            (0xF, _, 0x1, 0x8) => self.instruction_fx18(x),
+            (0xF, _, 0x1, 0xE) => self.instruction_fx1e(x),
+            (0xF, _, 0x2, 0x9) => self.instruction_fx29(x),
+            (0xF, _, 0x3, 0x3) => self.instruction_fx33(x),
+            (0xF, _, 0x5, 0x5) => self.instruction_fx55(x),
+            (0xF, _, 0x6, 0x5) => self.instruction_fx65(x),
             _ => panic!("Unknown instruction {:#06X}", opcode),
         }
 
@@ -224,5 +224,184 @@ impl Cpu {
 
     /* EXECUTION OF INDIVIDUAL INSTRUCTIONS */
 
+    // 	Clears the display
+    fn instruction_00e0(&mut self) {
+
+    }
+
+    /* Returns from a subroutine, setting the PC to the address at the top of the stack
+     * and then subtracting 1 from the stack pointer. */
+    fn instruction_00ee(&mut self) {
+
+    }
+
+    // Jumps to address NNN
+    fn instruction_1nnn(&mut self, nnn: u16) {
+
+    }
+
+    /* Call subroutine at NNN, incrementing the stack pointer and then putting the current PC
+     * on the top of the stack.
+     * 
+     * The PC is then set to NNN. */
+    fn instruction_2nnn(&mut self, nnn: u16) {
+
+    }
+
+    // Skips the next instruction if Vx equals NN
+    fn instruction_3xnn(&mut self, x: usize, nn: u16) {
+
+    }
+
+    // Skips the next instruction if Vx does not equal NN
+    fn instruction_4xnn(&mut self, x: usize, nn: u16) {
+
+    }
+
+    // Skips the next instruction if Vx equals Vy
+    fn instruction_5xy0(&mut self, x: usize, y: usize) {
+
+    }
+
+    // Sets Vx to NN
+    fn instruction_6xnn(&mut self, x:usize, nn: u16) {
+
+    }
+
+    // Adds NN to Vx
+    fn instruction_7xnn(&mut self, x:usize, nn: u16) {
+        
+    }
+
+    // Sets Vx to the value of Vy
+    fn instruction_8xy0(&mut self, x: usize, y: usize) {
+
+    }
+
+    // Sets Vx to Vx OR Vy
+    fn instruction_8xy1(&mut self, x: usize, y: usize) {
+
+    }
+
+    // Sets Vx to Vx AND Vy
+    fn instruction_8xy2(&mut self, x: usize, y: usize) {
+
+    }
+    
+    // Sets Vx to Vx XOR Vy
+    fn instruction_8xy3(&mut self, x: usize, y: usize) {
+
+    }
+
+    // Adds Vy to Vx. VF is set to 1 when there's a carry, and to 0 when there is not
+    fn instruction_8xy4(&mut self, x: usize, y: usize) {
+
+    }
+
+    // Vy is subtracted from Vx. VF is set to 0 when there's a borrow, and 1 when there is not
+    fn instruction_8xy5(&mut self, x: usize, y: usize) {
+
+    }
+
+    // Stores the least significant bit of Vx in VF and then shifts Vx to the right by 1
+    fn instruction_8xy6(&mut self, x: usize) {
+
+    }
+
+    // Sets Vx to Vy minus Vx. VF is set to 0 when there's a borrow, and 1 when there is not
+    fn instruction_8xy7(&mut self, x: usize, y: usize) {
+
+    }
+
+    // Stores the most significant bit of Vx in VF and then shifts Vx to the left by 1
+    fn instruction_8xye(&mut self, x: usize) {
+
+    }
+
+    // Skips the next instruction if Vx does not equal Vy
+    fn instruction_9xy0(&mut self, x: usize, y: usize) {
+
+    }
+
+    // 	Sets I to the address NNN
+    fn instruction_annn(&mut self, nnn: u16) {
+
+    }
+
+    // Jumps to the address NNN plus V0
+    fn instruction_bnnn(&mut self, nnn: u16) {
+
+    }
+
+    // Sets Vx to the result of a bitwise and operation on a random number from 0 to 255 and NN
+    fn instruction_cxnn(&mut self, x: usize, nn: u16) {
+
+    }
+
+    /* Draws a sprite at coordinate (Vx, Vy) that has a width of 8 pixels and a height of N pixels.
+     * 
+     * Each row of 8 pixels is read as bit-coded starting from memory location I;
+     * I value does not change after the execution of this instruction.
+     * 
+     * VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn,
+     * and to 0 if that does not happen. */
+    fn instruction_dxyn(&mut self, x: usize, y: usize, n: u16) {
+
+    }
+
+    // Skips the next instruction if the key stored in Vx is pressed 
+    fn instruction_ex9e(&mut self, x: usize) {
+
+    }
+
+    // Skips the next instruction if the key stored in Vx is not pressed
+    fn instruction_exa1(&mut self, x: usize) {
+
+    }
+
+    // 	Sets Vx to the value of the delay timer
+    fn instruction_fx07(&mut self, x: usize) {
+
+    }
+
+    // A key press is awaited, and then stored in Vx
+    fn instruction_fx0a(&mut self, x: usize) {
+
+    }
+
+    // Sets the delay timer to Vx
+    fn instruction_fx15(&mut self, x: usize) {
+
+    }
+
+    // Sets the sound timer to Vx
+    fn instruction_fx18(&mut self, x: usize) {
+
+    }
+
+    // Adds Vx to I
+    fn instruction_fx1e(&mut self, x: usize) {
+
+    }
+
+    // Sets I to the location of the sprite for the character in Vx
+    fn instruction_fx29(&mut self, x: usize) {
+
+    }
+
+    // Stores the binary-coded decimal representation of Vx in memory locations I, I+1, and I+2
+    fn instruction_fx33(&mut self, x: usize) {
+
+    }
+
+    // Store registers V0 through Vx in memory starting at location I
+    fn instruction_fx55(&mut self, x: usize) {
+
+    }
+
+    // Read registers V0 through Vx from memory starting at location I
+    fn instruction_fx65(&mut self, x: usize) {
+
+    }
 
 }
