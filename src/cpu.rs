@@ -60,7 +60,7 @@ pub struct Cpu {
     sound_timer: u8,
     
     // A display that updates at 60 Hz and whose each pixel can be on or off
-    display: [[u8; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
+    display: [bool; DISPLAY_WIDTH * DISPLAY_HEIGHT],
     
     /* CHIP-8 uses a hexadecimal keypad that had 16 keys, labelled 0 through F,
      * and were arranged in a 4x4 grid */
@@ -89,7 +89,7 @@ impl Cpu {
             sp: 0,
             delay_timer: 0,
             sound_timer: 0,
-            display: [[0; DISPLAY_WIDTH]; DISPLAY_HEIGHT],
+            display: [false; DISPLAY_WIDTH * DISPLAY_HEIGHT],
             keypad: [false; 16], // Keys start as not pressed
             tick_period: time::Instant::now(), // Storing when the CPU cycle begins
         }
@@ -203,7 +203,7 @@ impl Cpu {
         // PC is incremented by 2 to be ready to fetch the next instruction 
         self.pc += 2;
 
-        /* If the time elapsed is greater or equal to the timer rate, it is time to decrement the timers.
+        /* If the time elapsed is greater or equal to the timer rate, the timers are decremented.
          * This ensures the timer rate is kept at 60Hz.  */
         if self.tick_period.elapsed() >= time::Duration::from_micros(TIMER_RATE) {
             
@@ -218,6 +218,7 @@ impl Cpu {
             self.delay_timer -= 1;
         }
         if self.sound_timer > 0 {
+            // PLAY SOUND HERE
             self.sound_timer -= 1;
         }
     }
