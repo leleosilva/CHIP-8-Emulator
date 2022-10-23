@@ -74,13 +74,13 @@ pub struct Cpu {
 impl Cpu {
 
     // Creating new instance of CPU
-    pub fn new() -> Cpu {
+    pub fn new() -> Self {
         
         // Initializing memory with 0's and storing font data at 0x50 ~ 0x9F address interval
         let mut aux_memory: [u8; MEMORY_SIZE] = [0; MEMORY_SIZE];
         aux_memory[0x50..(0x50 + CHIP8_FONT.len())].clone_from_slice(&CHIP8_FONT);
 
-        Cpu {
+        Self {
             memory: aux_memory,
             pc: START_ADDRESS, // Program counter starts at the initial address
             v: [0; 16],
