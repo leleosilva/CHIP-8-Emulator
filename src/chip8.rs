@@ -1,7 +1,7 @@
 use crate::cpu::Cpu;
 
 pub struct Chip8 {
-    pub cpu: Cpu,
+    cpu: Cpu,
 }
 
 impl Chip8 {
@@ -11,5 +11,10 @@ impl Chip8 {
         Chip8 {
             cpu: Cpu::new(),
         }
+    }
+
+    // Loads ROM using CPU method
+    pub fn load_rom(&mut self, rom_data: &[u8]) {
+        self.cpu.load_rom_in_memory(rom_data);
     }
 }

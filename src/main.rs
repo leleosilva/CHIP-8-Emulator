@@ -10,5 +10,5 @@ fn main() {
     
     let mut chip8 = Chip8::new();
     
-    chip8.cpu.load_rom(&rom_data);
+    chip8.load_rom(&rom_data);
 }
