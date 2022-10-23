@@ -227,7 +227,7 @@ impl Cpu {
 
     // 	Clears the display
     fn instruction_00e0(&mut self) {
-
+        self.display = [false; DISPLAY_WIDTH * DISPLAY_HEIGHT];
     }
 
     /* Returns from a subroutine, setting the PC to the address at the top of the stack
@@ -238,7 +238,7 @@ impl Cpu {
 
     // Jumps to address NNN
     fn instruction_1nnn(&mut self, nnn: u16) {
-
+        self.pc = nnn;
     }
 
     /* Call subroutine at NNN, incrementing the stack pointer and then putting the current PC
@@ -266,12 +266,12 @@ impl Cpu {
 
     // Sets Vx to NN
     fn instruction_6xnn(&mut self, x:usize, nn: u16) {
-
+        self.v[x] = nn as u8;
     }
 
     // Adds NN to Vx
     fn instruction_7xnn(&mut self, x:usize, nn: u16) {
-        
+        self.v[x] += nn as u8;
     }
 
     // Sets Vx to the value of Vy
@@ -326,7 +326,7 @@ impl Cpu {
 
     // 	Sets I to the address NNN
     fn instruction_annn(&mut self, nnn: u16) {
-
+        self.i = nnn;
     }
 
     // Jumps to the address NNN plus V0
