@@ -1,4 +1,6 @@
-use std::{time, ops::BitXor};
+#![allow(unused_variables, dead_code)]
+
+use std::time;
 
 // CHIP-8 can access 4KB (4096 bytes) of RAM
 const MEMORY_SIZE: usize = 4096;
