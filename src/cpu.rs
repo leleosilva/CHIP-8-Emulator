@@ -1,4 +1,4 @@
-use std::time;
+use std::{time, ops::BitXor};
 
 // CHIP-8 can access 4KB (4096 bytes) of RAM
 const MEMORY_SIZE: usize = 4096;
@@ -339,15 +339,53 @@ impl Cpu {
 
     }
 
-    /* Draws a sprite at coordinate (Vx, Vy) that has a width of 8 pixels and a height of N pixels.
+    /* Draws a sprite starting at coordinate (Vx, Vy) that has a width of 8 pixels and a height of N pixels.
+     * 
+     * Sprites are XORed onto the existing display.
      * 
      * Each row of 8 pixels is read as bit-coded starting from memory location I;
      * I value does not change after the execution of this instruction.
      * 
-     * VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn,
+     * If the sprite is positioned so part of it is outside the coordinates of the display,
+     * it wraps around to the opposite side of the display.
+     * 
+     * VF is set to 1 if any display pixels are flipped from set to unset when the sprite is drawn,
      * and to 0 if that does not happen. */
     fn instruction_dxyn(&mut self, x: usize, y: usize, n: u16) {
 
+        let height = n as usize;
+
+        // Initially, sets VF to 0
+        self.v[0xF] = 0;
+
+        for byte in 0..height {
+            let y_coord = (self.v[y] as usize + byte) % DISPLAY_HEIGHT;
+
+            // Accessing the current row of sprite pixels from RAM memory
+            let pixels = self.memory[self.i as usize + byte];
+
+            for bit in 0..8 {   
+                let x_coord = (self.v[x] as usize + bit) % DISPLAY_WIDTH;
+
+                /* Accessing specific pixel from the current row of sprite pixels
+                 * (most significant to least significant bit) */
+                let current_pixel = (pixels >> (7 - bit)) & 0x001;
+                
+                // Current sprite pixel is on
+                if current_pixel == 1 {
+
+                    // Getting index of current display pixel for the 1D display array
+                    let index = (DISPLAY_WIDTH * y_coord) + x_coord;
+
+                    /* If the sprite pixel and display pixel are both on, the display pixel will flip
+                     * from set to unset and VF should be set to 1 */
+                    if self.display[index] == true {
+                        self.v[0xF] = 1;
+                    }
+                    self.display[index] ^= true; // XOR operation that flips the display pixel
+                }
+            }
+        }
     }
 
     // Skips the next instruction if the key stored in Vx is pressed 
