@@ -2,6 +2,7 @@ mod chip8;
 mod cpu;
 
 use chip8::Chip8;
+use cpu::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
 fn main() {
     

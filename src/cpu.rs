@@ -6,8 +6,8 @@ use std::time;
 const MEMORY_SIZE: usize = 4096;
 
 // The display should be 64 pixels wide and 32 pixels tall
-const DISPLAY_WIDTH: usize = 64;
-const DISPLAY_HEIGHT: usize = 32;
+pub const DISPLAY_WIDTH: usize = 64;
+pub const DISPLAY_HEIGHT: usize = 32;
 
 // After loading, CHIP-8 programs start at address 0x200
 const START_ADDRESS: u16 = 0x200;
