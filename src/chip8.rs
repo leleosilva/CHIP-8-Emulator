@@ -17,4 +17,9 @@ impl Chip8 {
     pub fn load_rom(&mut self, rom_data: &[u8]) {
         self.cpu.load_rom_in_memory(rom_data);
     }
+
+    // Returns the display using the CPU method
+    pub fn get_display(&self) -> &[bool] {
+        self.cpu.get_display()
+    }
 }

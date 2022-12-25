@@ -101,8 +101,13 @@ impl Cpu {
     pub fn load_rom_in_memory(&mut self, rom_data: &[u8]) {
         let initial_address = START_ADDRESS as usize;
         let final_address = START_ADDRESS as usize + rom_data.len();
-        
+
         self.memory[initial_address..final_address].copy_from_slice(rom_data);
+    }
+
+    // Returns the display
+    pub fn get_display(&self) -> &[bool] {
+        &self.display
     }
 
     // Fetching the instruction from memory at the current PC
