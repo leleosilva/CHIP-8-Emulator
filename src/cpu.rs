@@ -99,7 +99,10 @@ impl Cpu {
 
     // Loading ROM data into memory, starting at the initial address
     pub fn load_rom_in_memory(&mut self, rom_data: &[u8]) {
-        self.memory[(START_ADDRESS as usize)..(START_ADDRESS as usize + rom_data.len())].copy_from_slice(rom_data);
+        let initial_address = START_ADDRESS as usize;
+        let final_address = START_ADDRESS as usize + rom_data.len();
+        
+        self.memory[initial_address..final_address].copy_from_slice(rom_data);
     }
 
     // Fetching the instruction from memory at the current PC
@@ -451,5 +454,5 @@ impl Cpu {
 mod tests {
     use super::*;
 
-    
+
 }
