@@ -446,3 +446,10 @@ impl Cpu {
     }
 
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    
+}
