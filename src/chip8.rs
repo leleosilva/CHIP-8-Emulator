@@ -22,4 +22,9 @@ impl Chip8 {
     pub fn get_display(&self) -> &[bool] {
         self.cpu.get_display()
     }
+
+    // Runs CHIP-8
+    pub fn run(&mut self) {
+        self.cpu.run();
+    }
 }
