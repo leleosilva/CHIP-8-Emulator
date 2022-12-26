@@ -208,10 +208,10 @@ impl Cpu {
 
         let opcode = self.fetch();
 
-        self.decode(opcode);
-
         // PC is incremented by 2 to be ready to fetch the next instruction 
         self.pc += 2;
+
+        self.decode(opcode);
 
         /* If the time elapsed is greater or equal to the timer rate, the timers are decremented.
          * This ensures the timer rate is kept at 60Hz.  */
