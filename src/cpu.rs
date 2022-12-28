@@ -365,7 +365,7 @@ impl Cpu {
 
         let height = n as usize;
 
-        // Initially, sets VF to 0
+        // Initially, VF is set to 0
         self.v[0xF] = 0;
 
         for byte in 0..height {
@@ -450,7 +450,7 @@ impl Cpu {
 
     // Read registers V0 through Vx from memory starting at location I
     fn instruction_fx65(&mut self, x: usize) {
-
+        
     }
 
 }
@@ -459,5 +459,322 @@ impl Cpu {
 mod tests {
     use super::*;
 
+    #[test]
+    fn test_cpu_initial_state() {
+        let cpu = Cpu::new();
+        
+        // Testing first line of font data in memory
+        assert_eq!(cpu.memory[0x50..0x55], [0xF0, 0x90, 0x90, 0x90, 0xF0]);
+        
+        // Getting indexes related to the last line of font data in memory
+        const FONT_INITIAL_IDX: usize = 0x50 + (CHIP8_FONT.len() - 5);
+        const FONT_FINAL_IDX: usize = 0x50 + CHIP8_FONT.len();
 
+        // Testing last line of font data in memory
+        assert_eq!(
+            cpu.memory[FONT_INITIAL_IDX..FONT_FINAL_IDX],
+            [0xF0, 0x80, 0xF0, 0x80, 0x80]
+        );
+
+        // Testing if memory after font data is correct
+        assert_eq!(
+            cpu.memory[(0x9F + 1)..],
+            [0; (MEMORY_SIZE - FONT_FINAL_IDX)]
+        );
+        assert_eq!(cpu.pc, 0x200);
+        assert_eq!(cpu.v, [0; 16]);
+        assert_eq!(cpu.i, 0);
+        assert_eq!(cpu.stack, [0; 16]);
+        assert_eq!(cpu.sp, 0);
+        assert_eq!(cpu.delay_timer, 0);
+        assert_eq!(cpu.sound_timer, 0);
+        assert_eq!(cpu.display, [false; DISPLAY_WIDTH * DISPLAY_HEIGHT]);
+        assert_eq!(cpu.keypad, [false; 16]);
+    }
+
+    #[test]
+    fn test_rom_loading() {
+        let mut cpu = Cpu::new();
+        cpu.load_rom_in_memory(&vec![1, 2, 3, 4]);
+        
+        assert_eq!(cpu.memory[0x200], 1);
+        assert_eq!(cpu.memory[0x201], 2);
+        assert_eq!(cpu.memory[0x202], 3);
+        assert_eq!(cpu.memory[0x203], 4);
+        assert_eq!(cpu.memory[0x205], 0); // 0x205 address should stay unchanged
+    }
+
+    #[test]
+    fn test_get_display() {
+        let cpu = Cpu::new();
+        assert_eq!(cpu.get_display(), [false; DISPLAY_WIDTH * DISPLAY_HEIGHT]);
+    }
+
+    #[test]
+    fn test_fetch() {
+        let mut cpu = Cpu::new();
+        cpu.load_rom_in_memory(&vec![0x24, 0x7C, 0xFF, 0x1]);
+        
+        cpu.pc = 0x200; // ROM is loaded starting on address 0x200
+        assert_eq!(cpu.fetch(), 0x247C);
+
+        cpu.pc = 0x201;
+        assert_eq!(cpu.fetch(), 0x7CFF);
+
+        cpu.pc = 0x202;
+        assert_eq!(cpu.fetch(), 0xFF01);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_decode_invalid_instruction() {
+        let mut cpu = Cpu::new();
+        cpu.decode(0x00FF); // Instruction 00FF is invalid
+    }
+
+    #[test]
+    fn test_update_timers() {
+        let mut cpu = Cpu::new();
+        cpu.delay_timer = 3;
+        cpu.sound_timer = 2;
+
+        cpu.update_timers();
+        assert_eq!(cpu.delay_timer, 2); assert_eq!(cpu.sound_timer, 1);
+
+        cpu.update_timers();
+        assert_eq!(cpu.delay_timer, 1); assert_eq!(cpu.sound_timer, 0);
+
+        cpu.update_timers();
+        assert_eq!(cpu.delay_timer, 0); assert_eq!(cpu.sound_timer, 0);
+    }
+
+    #[test]
+    fn test_instruction_00e0() {
+        let mut cpu = Cpu::new();
+
+        cpu.display = [true; DISPLAY_WIDTH * DISPLAY_HEIGHT];
+        assert_eq!(cpu.display, [true; DISPLAY_WIDTH * DISPLAY_HEIGHT]);
+
+        cpu.decode(0x00E0);
+
+        assert_eq!(cpu.display, [false; DISPLAY_WIDTH * DISPLAY_HEIGHT]);
+
+    }
+
+    fn test_instruction_00ee() {
+
+    }
+    
+    #[test]
+    fn test_instruction_1nnn() {
+        let mut cpu = Cpu::new();
+
+        assert_eq!(cpu.pc, 0x200);
+        cpu.decode(0x1420);
+        assert_eq!(cpu.pc, 0x0420);
+    }
+
+    fn test_instruction_2nnn() {
+
+    }
+
+    fn test_instruction_3xnn() {
+
+    }
+
+    fn test_instruction_4xnn() {
+
+    }
+
+    fn test_instruction_5xy0() {
+
+    }
+    
+    #[test]
+    fn test_instruction_6xnn() {
+        let mut cpu = Cpu::new();
+        
+        cpu.decode(0x6CD4);
+        assert_eq!(cpu.v[0xC], 0x0D4);
+
+        cpu.decode(0x643F);
+        assert_eq!(cpu.v[0x4], 0x03F);
+    }
+
+    #[test]
+    fn test_instruction_7xnn() {
+        let mut cpu = Cpu::new();
+
+        cpu.v[0xD] = 0x78;
+        let initial_v = cpu.v[0xD];
+
+        cpu.decode(0x7D21);
+        assert_eq!(cpu.v[0xD], (0x0021 + initial_v))
+    }
+
+    fn test_instruction_8xy0() {
+
+    }
+
+    fn test_instruction_8xy1() {
+
+    }
+
+    fn test_instruction_8xy2() {
+
+    }
+
+    fn test_instruction_8xy3() {
+
+    }
+
+    fn test_instruction_8xy4() {
+
+    }
+
+    fn test_instruction_8xy5() {
+
+    }
+
+    fn test_instruction_8xy6() {
+
+    }
+
+    fn test_instruction_8xy7() {
+
+    }
+
+    fn test_instruction_8xye() {
+
+    }
+
+    fn test_instruction_9xy0() {
+
+    }
+
+    #[test]
+    fn test_instruction_annn() {
+        let mut cpu = Cpu::new();
+
+        assert_eq!(cpu.i, 0);
+        cpu.decode(0xA123);
+        assert_eq!(cpu.i, 0x0123);
+    }
+
+    fn test_instruction_bnnn() {
+
+    }
+
+    fn test_instruction_cxnn() {
+
+    }
+
+    #[test]
+    /*
+     * For this test, the first three lines and three columns of the display will be used,
+     * with the initial state as below:
+     * 
+     *    Before
+     *  1	0	1
+     *  1	1	1
+     *  0	1	0
+     * 
+     * 
+     * Because the test uses a 3x3 display area, the sprite chosen has height N = 3, represented below:
+     * 
+     *   HEX      BIN       Sprite
+     *   0x3C   00111100     ****
+     *   0xC3   11000011   **    **
+     *   0xFF   11111111   ********
+     * 
+     * 
+     * After the sprite is drawn on the display, the 3x3 display area will change as below:
+     * 
+     *   After
+     * 1   0   0
+     * 0   0   1
+     * 1   0   1
+     * 
+     * Also, consider that initially I = 0, X = 0 and Y = 0.
+     */
+    fn test_instruction_dxyn() {
+        let mut cpu = Cpu::new();
+        
+        // Loading sprite in memory
+        cpu.memory[0] = 0x3C; // memory[I]
+        cpu.memory[1] = 0xC3; // memory[I + 1]
+        cpu.memory[2] = 0xFF; // memory[I + 2]
+
+        // Setting up display initial state
+        cpu.display[0] = true; // First line
+        cpu.display[1] = false;
+        cpu.display[2] = true;
+
+        cpu.display[0 + 1 * DISPLAY_WIDTH] = true; // Second line
+        cpu.display[1 + 1 * DISPLAY_WIDTH] = true;
+        cpu.display[2 + 1 * DISPLAY_WIDTH] = true;
+
+        cpu.display[0 + 2 * DISPLAY_WIDTH] = false; // Third line
+        cpu.display[1 + 2 * DISPLAY_WIDTH] = true;
+        cpu.display[2 + 2 * DISPLAY_WIDTH] = false;
+        cpu.decode(0xD003);
+        
+        assert_eq!(cpu.display[0], true); // Checking first line result
+        assert_eq!(cpu.display[1], false);
+        assert_eq!(cpu.display[2], false);
+
+        assert_eq!(cpu.display[0 + 1 * DISPLAY_WIDTH], false); // Checking second line result
+        assert_eq!(cpu.display[1 + 1 * DISPLAY_WIDTH], false);
+        assert_eq!(cpu.display[2 + 1 * DISPLAY_WIDTH], true);
+
+        assert_eq!(cpu.display[0 + 2 * DISPLAY_WIDTH], true); // Checking third line result
+        assert_eq!(cpu.display[1 + 2 * DISPLAY_WIDTH], false);
+        assert_eq!(cpu.display[2 + 2 * DISPLAY_WIDTH], true);
+
+        assert_eq!(cpu.v[0xF], 1);
+    }
+
+    fn test_instruction_ex9e() {
+
+    }
+
+    fn test_instruction_exa1() {
+
+    }
+
+    fn test_instruction_fx07() {
+
+    }
+
+    fn test_instruction_fx0a() {
+
+    }
+
+    fn test_instruction_fx15() {
+
+    }
+
+    fn test_instruction_fx18() {
+
+    }
+
+    fn test_instruction_fx1e() {
+
+    }
+
+    fn test_instruction_fx29() {
+
+    }
+
+    fn test_instruction_fx33() {
+
+    }
+
+    fn test_instruction_fx55() {
+
+    }
+
+    fn test_instruction_fx65() {
+
+    }
 }
