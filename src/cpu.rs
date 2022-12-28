@@ -295,22 +295,22 @@ impl Cpu {
 
     // Sets Vx to the value of Vy
     fn instruction_8xy0(&mut self, x: usize, y: usize) {
-
+        self.v[x] = self.v[y];
     }
 
     // Sets Vx to Vx OR Vy
     fn instruction_8xy1(&mut self, x: usize, y: usize) {
-
+        self.v[x] = self.v[x] | self.v[y];
     }
 
     // Sets Vx to Vx AND Vy
     fn instruction_8xy2(&mut self, x: usize, y: usize) {
-
+        self.v[x] = self.v[x] & self.v[y];
     }
     
     // Sets Vx to Vx XOR Vy
     fn instruction_8xy3(&mut self, x: usize, y: usize) {
-
+        self.v[x] = self.v[x] ^ self.v[y];
     }
 
     // Adds Vy to Vx. VF is set to 1 when there's a carry, and to 0 when there is not
@@ -340,7 +340,9 @@ impl Cpu {
 
     // Skips the next instruction if Vx does not equal Vy
     fn instruction_9xy0(&mut self, x: usize, y: usize) {
-
+        if self.v[x] != self.v[y] {
+            self.pc += 2;
+        }
     }
 
     // 	Sets I to the address NNN
@@ -350,7 +352,7 @@ impl Cpu {
 
     // Jumps to the address NNN plus V0
     fn instruction_bnnn(&mut self, nnn: u16) {
-
+        self.pc = nnn + self.v[0] as u16;
     }
 
     // Sets Vx to the result of a bitwise and operation on a random number from 0 to 255 and NN
@@ -663,20 +665,43 @@ mod tests {
         assert_eq!(cpu.v[0xD], (0x0021 + initial_v))
     }
 
+    #[test]
     fn test_instruction_8xy0() {
+        let mut cpu = Cpu::new();
+        cpu.v[2] = 0x7F;
 
+        cpu.decode(0x8120);
+        assert_eq!(cpu.v[1], 0x7F);
     }
 
+    #[test]
     fn test_instruction_8xy1() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xA;
+        cpu.v[1] = 0xFF;
 
+        cpu.decode(0x8011);
+        assert_eq!(cpu.v[0], 0xFF);
     }
 
+    #[test]
     fn test_instruction_8xy2() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xA;
+        cpu.v[1] = 0xFF;
 
+        cpu.decode(0x8012);
+        assert_eq!(cpu.v[0], 0xA);
     }
 
+    #[test]
     fn test_instruction_8xy3() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xA;
+        cpu.v[1] = 0xFF;
 
+        cpu.decode(0x8013);
+        assert_eq!(cpu.v[0], 0xF5);
     }
 
     fn test_instruction_8xy4() {
@@ -699,8 +724,18 @@ mod tests {
 
     }
 
+    #[test]
     fn test_instruction_9xy0() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0x4;
+        cpu.v[1] = 0x4;
+        cpu.pc = 1;
+        
+        cpu.decode(0x9010); // Vx and Vy are equal
+        assert_ne!(cpu.pc, 3);
 
+        cpu.decode(0x9120); // Vx and Vy are not equal
+        assert_eq!(cpu.pc, 3);
     }
 
     #[test]
@@ -712,8 +747,13 @@ mod tests {
         assert_eq!(cpu.i, 0x0123);
     }
 
+    #[test]
     fn test_instruction_bnnn() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0x5;
+        cpu.decode(0xB666);
 
+        assert_eq!(cpu.pc, 0x066B);
     }
 
     fn test_instruction_cxnn() {
