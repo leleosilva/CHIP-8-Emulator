@@ -570,8 +570,15 @@ mod tests {
 
     }
 
+    #[test]
     fn test_instruction_00ee() {
+        let mut cpu = Cpu::new();
+        cpu.sp = 3;
+        cpu.stack[3] = 0x1C;
 
+        cpu.decode(0x00EE);
+        assert_eq!(cpu.sp, 2);
+        assert_eq!(cpu.pc, 0x1C);
     }
     
     #[test]
@@ -583,20 +590,55 @@ mod tests {
         assert_eq!(cpu.pc, 0x0420);
     }
 
+    #[test]
     fn test_instruction_2nnn() {
+        let mut cpu = Cpu::new();
+        cpu.pc = 3;
 
+        cpu.decode(0x2369);
+        assert_eq!(cpu.sp, 1);
+        assert_eq!(cpu.stack[1], 3);
+        assert_eq!(cpu.pc, 0x0369);
     }
 
+    #[test]
     fn test_instruction_3xnn() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0x13;
+        cpu.pc = 1;
 
+        cpu.decode(0x3026);
+        assert_ne!(cpu.pc, 3);
+
+        cpu.decode(0x3013);
+        assert_eq!(cpu.pc, 3);
     }
 
+    #[test]
     fn test_instruction_4xnn() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0x13;
+        cpu.pc = 1;
 
+        cpu.decode(0x4026);
+        assert_eq!(cpu.pc, 3);
+
+        cpu.decode(0x4013);
+        assert_ne!(cpu.pc, 5);
     }
 
+    #[test]
     fn test_instruction_5xy0() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0x4;
+        cpu.v[1] = 0x4;
+        cpu.pc = 1;
+        
+        cpu.decode(0x5010); // Vx and Vy are equal
+        assert_eq!(cpu.pc, 3);
 
+        cpu.decode(0x5120); // Vx and Vy are not equal
+        assert_ne!(cpu.pc, 5);
     }
     
     #[test]
