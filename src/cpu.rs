@@ -243,7 +243,8 @@ impl Cpu {
     /* Returns from a subroutine, setting the PC to the address at the top of the stack
      * and then subtracting 1 from the stack pointer. */
     fn instruction_00ee(&mut self) {
-
+        self.pc = self.stack[self.sp as usize];
+        self.sp -= 1;
     }
 
     // Jumps to address NNN
@@ -256,22 +257,30 @@ impl Cpu {
      * 
      * The PC is then set to NNN. */
     fn instruction_2nnn(&mut self, nnn: u16) {
-
+        self.sp += 1;
+        self.stack[self.sp as usize] = self.pc;
+        self.pc = nnn;
     }
 
     // Skips the next instruction if Vx equals NN
     fn instruction_3xnn(&mut self, x: usize, nn: u16) {
-
+        if self.v[x] as u16 == nn {
+            self.pc += 2;
+        }
     }
 
     // Skips the next instruction if Vx does not equal NN
     fn instruction_4xnn(&mut self, x: usize, nn: u16) {
-
+        if self.v[x] as u16 != nn {
+            self.pc += 2;
+        }
     }
 
     // Skips the next instruction if Vx equals Vy
     fn instruction_5xy0(&mut self, x: usize, y: usize) {
-
+        if self.v[x] == self.v[y] {
+            self.pc += 2;
+        }
     }
 
     // Sets Vx to NN
@@ -717,6 +726,7 @@ mod tests {
         cpu.display[0 + 2 * DISPLAY_WIDTH] = false; // Third line
         cpu.display[1 + 2 * DISPLAY_WIDTH] = true;
         cpu.display[2 + 2 * DISPLAY_WIDTH] = false;
+
         cpu.decode(0xD003);
         
         assert_eq!(cpu.display[0], true); // Checking first line result
