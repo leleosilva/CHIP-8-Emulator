@@ -53,7 +53,7 @@ pub struct Cpu {
     stack: [u16; 16],
     
     // Stack pointer which is used to point to the topmost level of the stack
-    sp: u8,
+    sp: usize,
     
     // Delay timer which is decremented at a rate of 60 Hz until it reaches 0
     delay_timer: u8,
@@ -243,7 +243,7 @@ impl Cpu {
     /* Returns from a subroutine, setting the PC to the address at the top of the stack
      * and then subtracting 1 from the stack pointer. */
     fn instruction_00ee(&mut self) {
-        self.pc = self.stack[self.sp as usize];
+        self.pc = self.stack[self.sp];
         self.sp -= 1;
     }
 
@@ -258,7 +258,7 @@ impl Cpu {
      * The PC is then set to NNN. */
     fn instruction_2nnn(&mut self, nnn: u16) {
         self.sp += 1;
-        self.stack[self.sp as usize] = self.pc;
+        self.stack[self.sp] = self.pc;
         self.pc = nnn;
     }
 
