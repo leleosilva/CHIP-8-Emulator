@@ -315,27 +315,44 @@ impl Cpu {
 
     // Adds Vy to Vx. VF is set to 1 when there's a carry, and to 0 when there is not
     fn instruction_8xy4(&mut self, x: usize, y: usize) {
-
+        self.v[0xF] = if (u16::from(self.v[x]) + u16::from(self.v[y])) > u16::from(u8::MAX) {
+            1
+        } else {
+            0
+        };
+        self.v[x] = self.v[x].wrapping_add(self.v[y]);
     }
 
     // Vy is subtracted from Vx. VF is set to 0 when there's a borrow, and 1 when there is not
     fn instruction_8xy5(&mut self, x: usize, y: usize) {
-
+        self.v[0xF] = if self.v[x] > self.v[y] {
+            1
+        } else {
+            0
+        };
+        self.v[x] = self.v[x].wrapping_sub(self.v[y]);
     }
 
     // Stores the least significant bit of Vx in VF and then shifts Vx to the right by 1
     fn instruction_8xy6(&mut self, x: usize) {
-
+        self.v[0xF] = self.v[x] & 1; // Getting LSB
+        self.v[x] >>= 1;
     }
 
     // Sets Vx to Vy minus Vx. VF is set to 0 when there's a borrow, and 1 when there is not
     fn instruction_8xy7(&mut self, x: usize, y: usize) {
-
+        self.v[0xF] = if self.v[y] > self.v[x] {
+            1
+        } else {
+            0
+        };
+        self.v[x] = self.v[y].wrapping_sub(self.v[x]);
     }
 
     // Stores the most significant bit of Vx in VF and then shifts Vx to the left by 1
     fn instruction_8xye(&mut self, x: usize) {
-
+        self.v[0xF] = (self.v[x] >> 7) & 1; // Getting MSB
+        self.v[x] <<= 1;
     }
 
     // Skips the next instruction if Vx does not equal Vy
@@ -355,7 +372,7 @@ impl Cpu {
         self.pc = nnn + self.v[0] as u16;
     }
 
-    // Sets Vx to the result of a bitwise and operation on a random number from 0 to 255 and NN
+    // Sets Vx to the result of a bitwise AND operation on a random number from 0 to 255 and NN
     fn instruction_cxnn(&mut self, x: usize, nn: u16) {
 
     }
@@ -703,25 +720,91 @@ mod tests {
         cpu.decode(0x8013);
         assert_eq!(cpu.v[0], 0xF5);
     }
-
+    
+    #[test]
     fn test_instruction_8xy4() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xF;
+        cpu.v[1] = 0xA;
 
+        cpu.decode(0x8014); // Addition without carry
+        assert_eq!(cpu.v[0], 0x19);
+        assert_eq!(cpu.v[0xF], 0);
+
+        cpu.v[0] = 0xFF;
+        cpu.v[1] = 0xF;
+
+        cpu.decode(0x8014); // Addition with carry
+        assert_eq!(cpu.v[0], 0xE);
+        assert_eq!(cpu.v[0xF], 1);
     }
 
+    #[test]
     fn test_instruction_8xy5() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xA;
+        cpu.v[1] = 0xF;
 
+        cpu.decode(0x8015); // Subtraction with borrow (VF should be 0)
+        assert_eq!(cpu.v[0], 0xFB);
+        assert_eq!(cpu.v[0xF], 0);
+
+        cpu.v[0] = 0xF;
+        cpu.v[1] = 0xA;
+
+        cpu.decode(0x8015); // Subtraction without borrow (VF should be 1)
+        assert_eq!(cpu.v[0], 0x5);
+        assert_eq!(cpu.v[0xF], 1);
     }
 
+    #[test]
     fn test_instruction_8xy6() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xC; // Decimal = 12; Binary = 1100
+        
+        cpu.decode(0x8006); // LSB is 0
+        assert_eq!(cpu.v[0], 0x6);
+        assert_eq!(cpu.v[0xF], 0);
 
+        cpu.v[0] = 0x11; // Decimal = 17; Binary = 10001
+        
+        cpu.decode(0x8006); // LSB is 1
+        assert_eq!(cpu.v[0], 0x8);
+        assert_eq!(cpu.v[0xF], 1);
     }
 
+    #[test]
     fn test_instruction_8xy7() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xF;
+        cpu.v[1] = 0xA;
 
+        cpu.decode(0x8017); // Subtraction with borrow (VF should be 0)
+        assert_eq!(cpu.v[0], 0xFB);
+        assert_eq!(cpu.v[0xF], 0);
+
+        cpu.v[0] = 0xA;
+        cpu.v[1] = 0xF;
+
+        cpu.decode(0x8017); // Subtraction without borrow (VF should be 1)
+        assert_eq!(cpu.v[0], 0x5);
+        assert_eq!(cpu.v[0xF], 1);
     }
 
+    #[test]
     fn test_instruction_8xye() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xA; // Decimal = 10; Binary = 1010
+        
+        cpu.decode(0x800E); // MSB is 0
+        assert_eq!(cpu.v[0], 0x14);
+        assert_eq!(cpu.v[0xF], 0);
 
+        cpu.v[0] = 0xF0; // Decimal = 240; Binary = 11110000
+        
+        cpu.decode(0x800E); // MSB is 1
+        assert_eq!(cpu.v[0], 0xE0);
+        assert_eq!(cpu.v[0xF], 1);
     }
 
     #[test]
