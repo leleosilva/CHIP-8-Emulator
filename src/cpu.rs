@@ -1,5 +1,6 @@
 #![allow(unused_variables, dead_code)]
 
+use rand::{self, Rng};
 use std::time;
 
 // CHIP-8 can access 4KB (4096 bytes) of RAM
@@ -374,7 +375,7 @@ impl Cpu {
 
     // Sets Vx to the result of a bitwise AND operation on a random number from 0 to 255 and NN
     fn instruction_cxnn(&mut self, x: usize, nn: u16) {
-
+        self.v[x] = (nn as u8) & rand::thread_rng().gen::<u8>();
     }
 
     /* Draws a sprite starting at coordinate (Vx, Vy) that has a width of 8 pixels and a height of N pixels.
@@ -428,12 +429,16 @@ impl Cpu {
 
     // Skips the next instruction if the key stored in Vx is pressed 
     fn instruction_ex9e(&mut self, x: usize) {
-
+        if self.keypad[self.v[x] as usize] {
+            self.pc += 2;
+        }
     }
 
     // Skips the next instruction if the key stored in Vx is not pressed
     fn instruction_exa1(&mut self, x: usize) {
-
+        if !self.keypad[self.v[x] as usize] {
+            self.pc += 2;
+        }
     }
 
     // 	Sets Vx to the value of the delay timer
@@ -839,8 +844,18 @@ mod tests {
         assert_eq!(cpu.pc, 0x066B);
     }
 
+    #[test]
     fn test_instruction_cxnn() {
+        let mut cpu = Cpu::new();
 
+        cpu.decode(0xC000);
+        assert_eq!(cpu.v[0], 0x0);
+
+        /* Binary of F:  00001111
+         * Binary of F0: 11110000
+         * Therefore, (F & [random u8]) & F0 should always be 0 */
+        cpu.decode(0xC00F);
+        assert_eq!(cpu.v[0] & 0xF0, 0)
     }
 
     #[test]
@@ -909,12 +924,38 @@ mod tests {
         assert_eq!(cpu.v[0xF], 1);
     }
 
+    #[test]
     fn test_instruction_ex9e() {
+        let mut cpu = Cpu::new();
+        
+        cpu.v[0] = 0xF;
+        cpu.keypad[0xF] = true;
+        cpu.pc = 1;
+        cpu.decode(0xE09E);
+        
+        assert_eq!(cpu.pc, 3);
 
+        cpu.v[0] = 0x3;
+        cpu.decode(0xE09E);
+        
+        assert_ne!(cpu.pc, 5);
     }
 
+    #[test]
     fn test_instruction_exa1() {
+        let mut cpu = Cpu::new();
+        
+        cpu.v[0] = 0xF;
+        cpu.keypad[0xF] = true;
+        cpu.pc = 1;
+        cpu.decode(0xE0A1);
+        
+        assert_ne!(cpu.pc, 3);
 
+        cpu.v[0] = 0x3;
+        cpu.decode(0xE0A1);
+        
+        assert_eq!(cpu.pc, 3);
     }
 
     fn test_instruction_fx07() {
