@@ -495,12 +495,16 @@ impl Cpu {
 
     // Store registers V0 through Vx in memory starting at location I
     fn instruction_fx55(&mut self, x: usize) {
-
+        for idx in 0..(x + 1) {
+            self.memory[self.i as usize + idx] = self.v[idx];
+        }
     }
 
     // Read registers V0 through Vx from memory starting at location I
     fn instruction_fx65(&mut self, x: usize) {
-        
+        for idx in 0..(x + 1) {
+            self.v[idx] = self.memory[self.i as usize + idx];
+        }
     }
 
 }
@@ -1036,7 +1040,7 @@ mod tests {
     fn test_instruction_fx29() {
         let mut cpu = Cpu::new();
         cpu.v[0] = 0xD;
-        
+
         let expected_value = 0x50 + (cpu.v[0] * 5) as u16;
         cpu.decode(0xF029);
         assert_eq!(cpu.i, expected_value);
@@ -1053,11 +1057,33 @@ mod tests {
         assert_eq!(cpu.memory[cpu.i as usize + 2], 4);
     }
 
+    #[test]
     fn test_instruction_fx55() {
+        let mut cpu = Cpu::new(); 
+        cpu.i = 2000;
 
+        for idx in 0..16 {
+            cpu.v[idx] = idx as u8;
+        }
+
+        cpu.decode(0xFF55);
+        for idx in 0..16 {
+            assert_eq!(cpu.memory[2000 + idx], cpu.v[idx])
+        }
     }
 
+    #[test]
     fn test_instruction_fx65() {
+        let mut cpu = Cpu::new(); 
+        cpu.i = 2000;
 
+        for idx in 0..16 {
+            cpu.memory[2000 + idx] = idx as u8;
+        }
+
+        cpu.decode(0xFF65);
+        for idx in 0..16 {
+            assert_eq!(cpu.v[idx], cpu.memory[2000 + idx]);
+        }
     }
 }
