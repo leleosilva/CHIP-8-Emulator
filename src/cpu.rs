@@ -291,7 +291,7 @@ impl Cpu {
 
     // Adds NN to Vx
     fn instruction_7xnn(&mut self, x:usize, nn: u16) {
-        self.v[x] += nn as u8;
+        self.v[x] = self.v[x].wrapping_add(nn as u8);
     }
 
     // Sets Vx to the value of Vy
