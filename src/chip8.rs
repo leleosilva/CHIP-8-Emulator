@@ -27,4 +27,12 @@ impl Chip8 {
     pub fn run(&mut self) {
         self.cpu.run();
     }
+
+    pub fn press_key(&mut self, keypad_idx: usize) {
+        self.cpu.set_key(keypad_idx, true);
+    }
+
+    pub fn release_key(&mut self, keypad_idx: usize) {
+        self.cpu.set_key(keypad_idx, false);
+    }
 }

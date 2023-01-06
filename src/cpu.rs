@@ -111,6 +111,10 @@ impl Cpu {
         &self.display
     }
 
+    pub fn set_key(&mut self, idx: usize, pressed: bool) {
+        self.keypad[idx] = pressed;
+    }
+
     // Fetching the instruction from memory at the current PC
     fn fetch(&mut self) -> u16 {
         
