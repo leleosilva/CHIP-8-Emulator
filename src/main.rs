@@ -64,12 +64,12 @@ fn main() -> Result<(), String> {
                 Event::Quit {..} | Event::KeyDown {keycode: Some(Keycode::Escape), ..} => {
                     break 'emulation_cycle;
                 },
-                Event::KeyUp {keycode: Some(key), ..} => {
+                Event::KeyDown {keycode: Some(key), ..} => {
                     if let Some(k) = keycode_to_keypad(key) {
                         chip8.press_key(k);
                     }
                 },
-                Event::KeyDown {keycode: Some(key), ..} => {
+                Event::KeyUp {keycode: Some(key), ..} => {
                     if let Some(k) = keycode_to_keypad(key) {
                         chip8.release_key(k);
                     }
