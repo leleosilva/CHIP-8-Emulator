@@ -482,11 +482,15 @@ impl Cpu {
     // Sets I to the location of the sprite for the character in Vx
     fn instruction_fx29(&mut self, x: usize) {
 
+        // Multiplying by 5 because each sprite takes up 5 bytes in memory
+        self.i = 0x50 + (self.v[x] * 5) as u16; // 0x50 is the initial address where fonts are stored in memory
     }
 
     // Stores the binary-coded decimal representation of Vx in memory locations I, I+1, and I+2
     fn instruction_fx33(&mut self, x: usize) {
-
+        self.memory[self.i as usize] = self.v[x] / 100;
+        self.memory[self.i as usize + 1] = (self.v[x] / 10) % 10;
+        self.memory[self.i as usize + 2] = self.v[x] % 10;
     }
 
     // Store registers V0 through Vx in memory starting at location I
@@ -1028,12 +1032,25 @@ mod tests {
         assert_eq!(cpu.i, 0xA);
     }
 
+    #[test]
     fn test_instruction_fx29() {
-
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xD;
+        
+        let expected_value = 0x50 + (cpu.v[0] * 5) as u16;
+        cpu.decode(0xF029);
+        assert_eq!(cpu.i, expected_value);
     }
 
+    #[test]
     fn test_instruction_fx33() {
+        let mut cpu = Cpu::new();  
+        cpu.v[0] = 214;
 
+        cpu.decode(0xF033);
+        assert_eq!(cpu.memory[cpu.i as usize], 2);
+        assert_eq!(cpu.memory[cpu.i as usize + 1], 1);
+        assert_eq!(cpu.memory[cpu.i as usize + 2], 4);
     }
 
     fn test_instruction_fx55() {
