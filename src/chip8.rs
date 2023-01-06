@@ -1,7 +1,9 @@
 use crate::cpu::Cpu;
+use std::time;
 
 pub struct Chip8 {
     cpu: Cpu,
+    pub tick_period: time::Instant,
 }
 
 impl Chip8 {
@@ -10,6 +12,7 @@ impl Chip8 {
     pub fn new() -> Self {
         Self {
             cpu: Cpu::new(),
+            tick_period: std::time::Instant::now(),
         }
     }
 
