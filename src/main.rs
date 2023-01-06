@@ -23,7 +23,6 @@ fn main() -> Result<(), String> {
     if args.len() != 2 {
         return Err(String::from("Path to ROM file not found"));
     }
-    println!("{:?}", args);
 
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -79,13 +78,14 @@ fn main() -> Result<(), String> {
             }
         }
 
-        chip8.run();
-        
-        if let Err(c) = draw_display(&chip8, &mut canvas) {
-            return Err(c);
+        if chip8.tick_period.elapsed() >= std::time::Duration::from_micros(2000) {
+            chip8.run();
+            if let Err(c) = draw_display(&chip8, &mut canvas) {
+                return Err(c);
+            }
+            chip8.tick_period = std::time::Instant::now();
         }
     }
-
     Ok(())
 }
 
