@@ -443,27 +443,40 @@ impl Cpu {
 
     // 	Sets Vx to the value of the delay timer
     fn instruction_fx07(&mut self, x: usize) {
-
+        self.v[x] = self.delay_timer;
     }
 
-    // A key press is awaited, and then stored in Vx
+    // All execution stops until a key is pressed, then the value of that key is stored in Vx
     fn instruction_fx0a(&mut self, x: usize) {
+        let mut keypress = false;
 
+        for idx in 0..self.keypad.len() {
+            if self.keypad[idx] {
+                self.pc += 2; // A keypress is found; PC can continue to the next instruction
+                self.v[x] = idx as u8;
+                keypress = true;
+                break;
+            }
+        }
+
+        if !keypress {
+            self.pc -= 2; // If no keypresses are detected, PC loops back to this instruction
+        }
     }
 
     // Sets the delay timer to Vx
     fn instruction_fx15(&mut self, x: usize) {
-
+        self.delay_timer = self.v[x];
     }
 
     // Sets the sound timer to Vx
     fn instruction_fx18(&mut self, x: usize) {
-
+        self.sound_timer = self.v[x];
     }
 
     // Adds Vx to I
     fn instruction_fx1e(&mut self, x: usize) {
-
+        self.i += self.v[x] as u16;
     }
 
     // Sets I to the location of the sprite for the character in Vx
@@ -843,7 +856,7 @@ mod tests {
 
         assert_eq!(cpu.pc, 0x066B);
     }
-
+    
     #[test]
     fn test_instruction_cxnn() {
         let mut cpu = Cpu::new();
@@ -958,24 +971,61 @@ mod tests {
         assert_eq!(cpu.pc, 3);
     }
 
+    #[test]
     fn test_instruction_fx07() {
+        let mut cpu = Cpu::new();
+        cpu.delay_timer = 0xA3;
 
+        assert_eq!(cpu.v[0], 0);
+        cpu.decode(0xF007);
+        assert_eq!(cpu.v[0], 0xA3);
     }
 
+    #[test]
     fn test_instruction_fx0a() {
+        let mut cpu = Cpu::new();
+        cpu.pc = 3;
 
+        cpu.decode(0xF00A); // No keypresses
+        assert_eq!(cpu.pc, 1);
+        assert_eq!(cpu.v[0], 0);
+
+        cpu.keypad[7] = true; // Keypress on index 7
+        cpu.decode(0xF00A);
+        assert_eq!(cpu.pc, 3);
+        assert_eq!(cpu.v[0], 7);
     }
 
+    #[test]
     fn test_instruction_fx15() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xA3;
 
+        assert_eq!(cpu.delay_timer, 0);
+        cpu.decode(0xF015);
+        assert_eq!(cpu.delay_timer, 0xA3);
     }
 
+    #[test]
     fn test_instruction_fx18() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0xA3;
 
+        assert_eq!(cpu.sound_timer, 0);
+        cpu.decode(0xF018);
+        assert_eq!(cpu.sound_timer, 0xA3);
     }
 
+    #[test]
     fn test_instruction_fx1e() {
+        let mut cpu = Cpu::new();
+        cpu.v[0] = 0x5;
 
+        assert_eq!(cpu.i, 0);
+        cpu.decode(0xF01E);
+        assert_eq!(cpu.i, 0x5);
+        cpu.decode(0xF01E);
+        assert_eq!(cpu.i, 0xA);
     }
 
     fn test_instruction_fx29() {
