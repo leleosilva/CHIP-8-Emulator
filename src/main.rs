@@ -1,20 +1,12 @@
 mod chip8;
 mod cpu;
+mod drivers;
 
 use chip8::Chip8;
-use cpu::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
+use drivers::DisplayDriver;
 
-const WINDOW_SCALE: u32 = 15;
-const WINDOW_WIDTH: u32 = (DISPLAY_WIDTH as u32) * WINDOW_SCALE;
-const WINDOW_HEIGHT: u32 = (DISPLAY_HEIGHT as u32) * WINDOW_SCALE;
-
-use sdl2::VideoSubsystem;
-use sdl2::rect::Rect;
-use sdl2::video::{Window, WindowBuildError};
-use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::render::Canvas;
 
 fn main() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
@@ -25,24 +17,9 @@ fn main() -> Result<(), String> {
     }
 
     let sdl_context = sdl2::init()?;
-    let video_subsystem = sdl_context.video()?;
 
-    // Building window
-    let window = if let Ok(w) = build_sdl_window(video_subsystem) {
-        w
-    } else {
-        return Err(String::from("Could not build SDL2 window"));
-    };
+    let mut display_driver = DisplayDriver::new(&sdl_context, None, None)?;
     
-    // Building canvas
-    let mut canvas = if let Ok(c) = window.into_canvas().build() {
-        c
-    } else {
-        return Err(String::from("Could not initialize a canvas from the specified SDL2 window"));
-    };
-
-    canvas.clear();
-    canvas.present();
 
     // Creating event pump
     let mut event_pump = sdl_context.event_pump()?;
@@ -80,7 +57,7 @@ fn main() -> Result<(), String> {
 
         if chip8.tick_period.elapsed() >= std::time::Duration::from_micros(2000) {
             chip8.run();
-            if let Err(c) = draw_display(&chip8, &mut canvas) {
+            if let Err(c) = display_driver.draw_display(chip8.get_display()) {
                 return Err(c);
             }
             chip8.tick_period = std::time::Instant::now();
@@ -89,42 +66,6 @@ fn main() -> Result<(), String> {
     Ok(())
 }
 
-fn build_sdl_window(video: VideoSubsystem) -> Result<Window, WindowBuildError> {
-    video
-        .window("CHIP-8 Emulator", WINDOW_WIDTH, WINDOW_HEIGHT)
-        .position_centered()
-        .build()
-}
-
-fn draw_display(chip8: &Chip8, canvas: &mut Canvas<Window>) -> Result<(), String>{
-    
-    // Clear canvas using black color
-    canvas.set_draw_color(Color::RGB(0, 0, 0));
-    canvas.clear();
-
-    let chip8_display = chip8.get_display();
-
-    // Draw color is set to white
-    canvas.set_draw_color(Color::RGB(255, 255, 255));
-
-    // Iterating through each display pixel. If pixel is true, it should be drawn
-    for (idx, pixel) in chip8_display.iter().enumerate() {
-        if *pixel {
-            let x_coord = (idx % DISPLAY_WIDTH) as u32;
-            let y_coord = (idx / DISPLAY_WIDTH) as u32;
-
-            let rect = Rect::new(
-                (x_coord * WINDOW_SCALE) as i32,
-                (y_coord * WINDOW_SCALE) as i32,
-                WINDOW_SCALE,
-                WINDOW_SCALE);
-
-            canvas.fill_rect(rect)?
-        }
-    }
-    canvas.present();
-    Ok(())
-}
 
 fn keycode_to_keypad(key: Keycode) -> Option<usize> {
     match key {
