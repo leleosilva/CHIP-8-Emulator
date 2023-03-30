@@ -3,10 +3,7 @@ mod cpu;
 mod drivers;
 
 use chip8::Chip8;
-use drivers::DisplayDriver;
-
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use drivers::{DisplayDriver, KeypadDriver};
 
 fn main() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
@@ -19,10 +16,7 @@ fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
 
     let mut display_driver = DisplayDriver::new(&sdl_context, None, None)?;
-    
-
-    // Creating event pump
-    let mut event_pump = sdl_context.event_pump()?;
+    let mut event_pump = KeypadDriver::new(&sdl_context)?;
 
     // Reading ROM file
     let rom_data;
@@ -35,23 +29,15 @@ fn main() -> Result<(), String> {
     
     chip8.load_rom(&rom_data);
 
-    'emulation_cycle: loop {
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit {..} | Event::KeyDown {keycode: Some(Keycode::Escape), ..} => {
-                    break 'emulation_cycle;
-                },
-                Event::KeyDown {keycode: Some(key), ..} => {
-                    if let Some(k) = keycode_to_keypad(key) {
-                        chip8.press_key(k);
-                    }
-                },
-                Event::KeyUp {keycode: Some(key), ..} => {
-                    if let Some(k) = keycode_to_keypad(key) {
-                        chip8.release_key(k);
-                    }
-                },
-                _ => (),
+    // Keep the CHIP-8 running as long as a quit event 'Err(())' has not been received
+    while let Ok(k) = event_pump.poll_event() {
+        
+        // Key press/release event
+        if let Some(k) = k {
+            if event_pump.key_pressed {
+                chip8.press_key(k);
+            } else {
+                chip8.release_key(k);
             }
         }
 
@@ -64,27 +50,4 @@ fn main() -> Result<(), String> {
         }
     }
     Ok(())
-}
-
-
-fn keycode_to_keypad(key: Keycode) -> Option<usize> {
-    match key {
-        Keycode::Num1 =>    Some(0x1),
-        Keycode::Num2 =>    Some(0x2),
-        Keycode::Num3 =>    Some(0x3),
-        Keycode::Num4 =>    Some(0xC),
-        Keycode::Q =>       Some(0x4),
-        Keycode::W =>       Some(0x5),
-        Keycode::E =>       Some(0x6),
-        Keycode::R =>       Some(0xD),
-        Keycode::A =>       Some(0x7),
-        Keycode::S =>       Some(0x8),
-        Keycode::D =>       Some(0x9),
-        Keycode::F =>       Some(0xE),
-        Keycode::Z =>       Some(0xA),
-        Keycode::X =>       Some(0x0),
-        Keycode::C =>       Some(0xB),
-        Keycode::V =>       Some(0xF),
-        _ =>                None,
-    }
 }
