@@ -19,6 +19,7 @@ pub struct DisplayDriver {
 
 impl DisplayDriver {
 
+    // Creates new instance of the display driver
     pub fn new(sdl_context: &sdl2::Sdl, bg_color: Option<Color>, main_color: Option<Color>) -> Result<Self, String> {
         let video_subsystem = sdl_context.video()?;
 
@@ -46,7 +47,7 @@ impl DisplayDriver {
         })
     }
 
-
+    // Build a SDL2 window
     fn build_sdl_window(video: VideoSubsystem) -> Result<Window, WindowBuildError> {
         video
             .window("CHIP-8 Emulator", WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -54,7 +55,7 @@ impl DisplayDriver {
             .build()
     }
 
-
+    // Draw on screen with chosen colors based on current state of the display
     pub fn draw_display(&mut self, chip8_display: &[bool]) -> Result<(), String>{
         
         // Clear canvas using black color
@@ -83,4 +84,5 @@ impl DisplayDriver {
         self.canvas.present();
         Ok(())
     }
+    
 }
