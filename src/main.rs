@@ -5,6 +5,8 @@ mod drivers;
 use chip8::Chip8;
 use drivers::{DisplayDriver, KeypadDriver};
 
+const CHIP8_RATE: u64 = 2000;
+
 fn main() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
 
@@ -16,7 +18,7 @@ fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
 
     let mut display_driver = DisplayDriver::new(&sdl_context, None, None)?;
-    let mut event_pump = KeypadDriver::new(&sdl_context)?;
+    let mut keypad_driver = KeypadDriver::new(&sdl_context)?;
 
     // Reading ROM file
     let rom_data;
@@ -30,22 +32,33 @@ fn main() -> Result<(), String> {
     chip8.load_rom(&rom_data);
 
     // Keep the CHIP-8 running as long as a quit event 'Err(())' has not been received
-    while let Ok(k) = event_pump.poll_event() {
+    while let Ok(k) = keypad_driver.poll_event() {
         
         // Key press/release event
         if let Some(k) = k {
-            if event_pump.key_pressed {
+            if keypad_driver.key_pressed {
                 chip8.press_key(k);
             } else {
                 chip8.release_key(k);
             }
         }
-
-        if chip8.tick_period.elapsed() >= std::time::Duration::from_micros(2000) {
+        
+        // Ensures that CHIP-8 runs at a rate of 500Hz (1s / 500 = 2000 microseconds)
+        if chip8.tick_period.elapsed() >= std::time::Duration::from_micros(CHIP8_RATE) {
             chip8.run();
-            if let Err(c) = display_driver.draw_display(chip8.get_display()) {
-                return Err(c);
+            
+            // Updates the display at a rate of 60Hz
+            if chip8.get_display_state() {
+                if let Err(c) = display_driver.draw_display(chip8.get_display()) {
+                    return Err(c);
+                }
             }
+            
+            // Beeps at a rate of 60Hz
+            if chip8.get_beep_state() {
+                println!("Beep!");
+            }
+            
             chip8.tick_period = std::time::Instant::now();
         }
     }

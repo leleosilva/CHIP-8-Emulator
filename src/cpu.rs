@@ -71,6 +71,12 @@ pub struct Cpu {
 
     // The period of time the CPU uses to finish a cycle
     tick_period: time::Instant,
+
+    // Flag to check if the display has been updated and needs to be redrawn
+    display_updated: bool,
+
+    // Flag to check if the emulator should beep
+    should_beep: bool,
     
 }
 
@@ -95,6 +101,8 @@ impl Cpu {
             display: [false; DISPLAY_WIDTH * DISPLAY_HEIGHT],
             keypad: [false; 16], // Keys start as not pressed
             tick_period: time::Instant::now(), // Storing when the CPU cycle begins
+            display_updated: false,
+            should_beep: false,
         }
     }
 
@@ -111,6 +119,17 @@ impl Cpu {
         &self.display
     }
 
+    // Returns the beep sound flag
+    pub fn get_beep_state(&self) -> bool {
+        self.should_beep
+    }
+
+    // Returns the display update flag
+    pub fn get_display_state(&self) -> bool {
+        self.display_updated
+    }
+
+    // Sets keypad key of chosen index as pressed/released
     pub fn set_key(&mut self, idx: usize, pressed: bool) {
         self.keypad[idx] = pressed;
     }
@@ -211,6 +230,9 @@ impl Cpu {
     // Running the CPU cycle
     pub fn run(&mut self) {
 
+        self.display_updated = false;
+        self.should_beep = false;
+
         let opcode = self.fetch();
 
         // PC is incremented by 2 to be ready to fetch the next instruction 
@@ -221,9 +243,9 @@ impl Cpu {
         /* If the time elapsed is greater or equal to the timer rate, the timers are decremented.
          * This ensures the timer rate is kept at 60Hz.  */
         if self.tick_period.elapsed() >= time::Duration::from_micros(TIMER_RATE) {
-            
+            self.display_updated = true; // The display should update when the timers update
             self.update_timers();
-            self.tick_period = time::Instant::now(); // Updating tick period after the cycle ends
+            self.tick_period = time::Instant::now(); // Updating tick period after a cycle ends
         }
     }
 
@@ -233,7 +255,7 @@ impl Cpu {
             self.delay_timer -= 1;
         }
         if self.sound_timer > 0 {
-            // PLAY SOUND HERE
+            self.should_beep = true;
             self.sound_timer -= 1;
         }
     }
