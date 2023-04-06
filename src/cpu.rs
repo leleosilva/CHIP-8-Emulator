@@ -162,25 +162,12 @@ impl Cpu {
 
         // The third nibble. Used as index for one of the 16 registers (Vy)
         let y = ((opcode & 0x00F0) >> 4) as usize;
-        
-        println!("opcode: {:X}", opcode);
-
-        println!("N: {:X}", n);
-        println!("NN: {:X}", nn);
-        println!("NNN: {:X}", nnn);
-        
-        println!("X: {:X}", x);
-        println!("Y: {:X}", y);
 
         // Dividing opcode in nibbles to select the instruction to be executed based on them
         let op1 = ((opcode & 0xF000) >> 12) as u8;
         let op2 = ((opcode & 0x0F00) >> 8) as u8;
         let op3 = ((opcode & 0x00F0) >> 4) as u8;
         let op4 = (opcode & 0x000F) as u8;
-        println!("op1: {:X}", op1);
-        println!("op2: {:X}", op2);
-        println!("op3: {:X}", op3);
-        println!("op4: {:X}", op4);
 
         // Control flow of instructions
         match (op1, op2, op3, op4) {
