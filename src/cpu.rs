@@ -231,7 +231,6 @@ impl Cpu {
     pub fn run(&mut self) {
 
         self.display_updated = false;
-        self.should_beep = false;
 
         let opcode = self.fetch();
 
@@ -257,6 +256,8 @@ impl Cpu {
         if self.sound_timer > 0 {
             self.should_beep = true;
             self.sound_timer -= 1;
+        } else {
+            self.should_beep = false;
         }
     }
 
