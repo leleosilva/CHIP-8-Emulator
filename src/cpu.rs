@@ -1,5 +1,3 @@
-#![allow(unused_variables, dead_code)]
-
 use rand::{self, Rng};
 use std::time;
 
@@ -161,11 +159,9 @@ impl Cpu {
 
         // The second nibble. Used as index for one of the 16 registers (Vx)
         let x = ((opcode & 0x0F00) >> 8) as usize;
-        let vx = self.v[x];
 
         // The third nibble. Used as index for one of the 16 registers (Vy)
         let y = ((opcode & 0x00F0) >> 4) as usize;
-        let vy = self.v[y];
         
         println!("opcode: {:X}", opcode);
 
