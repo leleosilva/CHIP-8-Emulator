@@ -1,36 +1,35 @@
 mod chip8;
 mod cpu;
 mod drivers;
+mod args;
 
 use chip8::Chip8;
 use drivers::{DisplayDriver, KeypadDriver, AudioDriver};
 
 const CHIP8_RATE: u64 = 1851;
 
+use args::Chip8Args;
+use clap::Parser;
+
 fn main() -> Result<(), String> {
-    let args: Vec<_> = std::env::args().collect();
-
-    // Checking if the command line arguments are correct (currently temporary)
-    if args.len() != 2 {
-        return Err(String::from("Path to ROM file not found"));
-    }
-
-    let sdl_context = sdl2::init()?;
-
-    let mut display_driver = DisplayDriver::new(&sdl_context, None, None)?;
-    let mut keypad_driver = KeypadDriver::new(&sdl_context)?;
-    let audio_driver = AudioDriver::new(&sdl_context)?;
+    let args = Chip8Args::parse();
 
     // Reading ROM file
     let rom_data;
-    match std::fs::read(&args[1]) {
+    match std::fs::read(&args.rom) {
         Ok(data) => rom_data = data,
-        Err(_e) => return Err(format!(".ch8 file could not be found or read on path '{}'", &args[1])),
+        Err(_e) => return Err(format!(".ch8 file could not be found or read on path '{}'", &args.rom)),
     };
+
+    // Initiating drivers
+    let sdl_context = sdl2::init()?;
+    let mut display_driver = DisplayDriver::new(&sdl_context, None, None)?;
+    let mut keypad_driver = KeypadDriver::new(&sdl_context)?;
+    let audio_driver = AudioDriver::new(&sdl_context)?;
     
+
     let mut chip8 = Chip8::new();
-    
-    chip8.load_rom(&rom_data);
+    chip8.load_rom(&rom_data)?;
 
     // Keep the CHIP-8 running as long as a quit event 'Err(())' has not been received
     while let Ok(k) = keypad_driver.poll_event() {
@@ -44,7 +43,7 @@ fn main() -> Result<(), String> {
             }
         }
         
-        // Ensures that CHIP-8 runs at a rate of 540Hz (1s / 540 = 1851 microseconds)
+        // Ensures that CHIP-8 runs at a rate of 540Hz (1s / 540Hz = 1851 microseconds)
         if chip8.tick_period.elapsed() >= std::time::Duration::from_micros(CHIP8_RATE) {
             chip8.run();
             
@@ -61,7 +60,7 @@ fn main() -> Result<(), String> {
             } else {
                 audio_driver.stop_beep();
             }
-            
+
             chip8.tick_period = std::time::Instant::now();
         }
     }
