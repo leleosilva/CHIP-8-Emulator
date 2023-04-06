@@ -105,11 +105,17 @@ impl Cpu {
     }
 
     // Loading ROM data into memory, starting at the initial address
-    pub fn load_rom_in_memory(&mut self, rom_data: &[u8]) {
+    pub fn load_rom_in_memory(&mut self, rom_data: &[u8]) -> Result<(), String> {
+        
         let initial_address = START_ADDRESS as usize;
         let final_address = START_ADDRESS as usize + rom_data.len();
 
-        self.memory[initial_address..final_address].copy_from_slice(rom_data);
+        if rom_data.len() > self.memory[initial_address..].len() {
+            Err(String::from("The chosen file is not a valid CHIP-8 ROM file."))
+        } else {
+            self.memory[initial_address..final_address].copy_from_slice(rom_data);
+            Ok(())
+        }
     }
 
     // Returns the display

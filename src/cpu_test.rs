@@ -34,15 +34,16 @@ fn test_cpu_initial_state() {
 }
 
 #[test]
-fn test_rom_loading() {
+fn test_rom_loading() -> Result<(), String> {
     let mut cpu = Cpu::new();
-    cpu.load_rom_in_memory(&vec![1, 2, 3, 4]);
+    cpu.load_rom_in_memory(&vec![1, 2, 3, 4])?;
     
     assert_eq!(cpu.memory[0x200], 1);
     assert_eq!(cpu.memory[0x201], 2);
     assert_eq!(cpu.memory[0x202], 3);
     assert_eq!(cpu.memory[0x203], 4);
     assert_eq!(cpu.memory[0x205], 0); // 0x205 address should stay unchanged
+    Ok(())
 }
 
 #[test]
@@ -52,9 +53,9 @@ fn test_get_display() {
 }
 
 #[test]
-fn test_fetch() {
+fn test_fetch() -> Result<(), String> {
     let mut cpu = Cpu::new();
-    cpu.load_rom_in_memory(&vec![0x24, 0x7C, 0xFF, 0x1]);
+    cpu.load_rom_in_memory(&vec![0x24, 0x7C, 0xFF, 0x1])?;
     
     cpu.pc = 0x200; // ROM is loaded starting on address 0x200
     assert_eq!(cpu.fetch(), 0x247C);
@@ -64,6 +65,7 @@ fn test_fetch() {
 
     cpu.pc = 0x202;
     assert_eq!(cpu.fetch(), 0xFF01);
+    Ok(())
 }
 
 #[test]

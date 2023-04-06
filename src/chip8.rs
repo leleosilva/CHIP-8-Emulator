@@ -18,8 +18,8 @@ impl Chip8 {
     }
 
     // Loads ROM using CPU method
-    pub fn load_rom(&mut self, rom_data: &[u8]) {
-        self.cpu.load_rom_in_memory(rom_data);
+    pub fn load_rom(&mut self, rom_data: &[u8]) -> Result<(), String> {
+        self.cpu.load_rom_in_memory(rom_data)
     }
 
     // Runs CHIP-8
