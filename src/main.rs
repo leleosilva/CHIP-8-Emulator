@@ -3,9 +3,9 @@ mod cpu;
 mod drivers;
 
 use chip8::Chip8;
-use drivers::{DisplayDriver, KeypadDriver};
+use drivers::{DisplayDriver, KeypadDriver, AudioDriver};
 
-const CHIP8_RATE: u64 = 2000;
+const CHIP8_RATE: u64 = 1851;
 
 fn main() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
@@ -19,6 +19,7 @@ fn main() -> Result<(), String> {
 
     let mut display_driver = DisplayDriver::new(&sdl_context, None, None)?;
     let mut keypad_driver = KeypadDriver::new(&sdl_context)?;
+    let audio_driver = AudioDriver::new(&sdl_context)?;
 
     // Reading ROM file
     let rom_data;
@@ -43,7 +44,7 @@ fn main() -> Result<(), String> {
             }
         }
         
-        // Ensures that CHIP-8 runs at a rate of 500Hz (1s / 500 = 2000 microseconds)
+        // Ensures that CHIP-8 runs at a rate of 540Hz (1s / 540 = 1851 microseconds)
         if chip8.tick_period.elapsed() >= std::time::Duration::from_micros(CHIP8_RATE) {
             chip8.run();
             
@@ -56,7 +57,9 @@ fn main() -> Result<(), String> {
             
             // Beeps at a rate of 60Hz
             if chip8.get_beep_state() {
-                println!("Beep!");
+                audio_driver.start_beep();
+            } else {
+                audio_driver.stop_beep();
             }
             
             chip8.tick_period = std::time::Instant::now();
