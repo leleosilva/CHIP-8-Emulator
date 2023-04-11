@@ -1,3 +1,4 @@
+
 # CHIP-8 Emulator
 
 ## Concept
@@ -5,20 +6,23 @@
 
 This project consists of an emulator for the original CHIP-8 interpreted language. It implements some of the fundamental concepts of Computer Architecture, such as dealing with the CPU structure, instruction cycle, I/O and system frequency.
 
-##
+## Prerequisites
 
-## Step-by-step
+## Step by step
 
-##
+## Installation
+
+## Usage
 
 ## To-Do List
-- Test compatibility with Windows systems.
-- Create a proper debugger using `egui` with:
+- Test compatibility with Windows systems;
+- Substitute SDL2 for `egui`;
+- Create a proper debugger with:
 	- A disassembler;
 	- An option to pause/resume the emulator;
 	- An option to choose new ROM files;
 	- An option to reload the same game;
-	- An option to change background and font colors.
+	- An option to change background and sprite colors.
   
 ## Author
 Leonardo Cavalcante da Silva ([@leleosilva](https://github.com/leleosilva))
